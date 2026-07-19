@@ -63,12 +63,10 @@ export const verifyEmail = async (req, res) => {
         });
 
         if (!user) {
-            return res
-                .status(400)
-                .json({
-                    success: false,
-                    message: "Invalid or expired verification code",
-                });
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired verification code",
+            });
         }
 
         user.isVerified = true;
@@ -97,5 +95,14 @@ export const login = async (req, res) => {
     res.send("Login route");
 };
 export const logout = async (req, res) => {
-    res.send("Logout route");
+    try {
+        res.clearCookie("jwt");
+        res.status(200).json({
+            success: true,
+            message: "Logged out successfully",
+        });
+    } catch (error) {
+        console.log("Logout failed", error.message);
+        res.status(400).json({ success: false, message: error.message });
+    }
 };
