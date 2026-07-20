@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Threads from "./components/AnimatedBackground.jsx";
 import SignupPage from "./pages/SignUpPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
+import EmailVerificationPage from "./pages/EmailVerificationPage.jsx";
 
 function App() {
     return (
@@ -15,6 +16,7 @@ function App() {
                     <Route path="/" element={<div>home</div>} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignupPage />} />
+                    <Route path="/verify-email" element={<EmailVerificationPage />} />
                 </Routes>
             </div>
         </div>
