@@ -7,6 +7,7 @@ import {
     sendVerificationEmail,
     sendWelcomeEmail,
     sendResetPasswordEmail,
+    sendResetSuccessEmail,
 } from "../mailtrap/emails.js";
 
 export const signup = async (req, res) => {
@@ -187,6 +188,61 @@ export const fogotPassword = async (req, res) => {
         });
     } catch (error) {
         console.log("Forgot password failed", error.message);
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+export const resetPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { password } = req.body;
+
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordTokenExpireAt: { $gt: new Date() },
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired reset token",
+            });
+        }
+
+        // update passowrd
+        const hashedPasswrod = await bcrypt.hash(password, 10);
+
+        user.password = hashedPasswrod;
+        user.resetPasswordToken = null;
+        user.resetPasswordTokenExpireAt = null;
+
+        await user.save();
+
+        // send reset successfull email
+        await sendResetSuccessEmail(user.email, user.name);
+
+        console.log(user, "Password reset successfully");
+        res.status(200).json({
+            success: true,
+            message: "Password reset successfully",
+        });
+    } catch (error) {
+        console.log("Reset password failed", error.message);
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+export const checkAuth = async (req, res) => {
+    try {
+        const user = await User.findById(req.userId).select("-password");
+        if (!user) {
+            return res
+                .status(404)
+                .json({ success: false, message: "User not found" });
+        }
+        res.status(200).json({ success: true, user });
+    } catch (error) {
+        console.log("Check auth failed", error.message);
         res.status(400).json({ success: false, message: error.message });
     }
 };
