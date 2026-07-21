@@ -145,8 +145,15 @@ const Threads = ({
         const container = containerRef.current;
         if (!container) return;
 
-        const renderer = new Renderer({ alpha: true });
-        const gl = renderer.gl;
+        let renderer, gl;
+        try {
+            renderer = new Renderer({ alpha: true });
+            gl = renderer.gl;
+            if (!gl) return;
+        } catch (e) {
+            console.error("WebGL failed to initialize:", e);
+            return;
+        }
         gl.clearColor(0, 0, 0, 0);
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);

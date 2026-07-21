@@ -1,18 +1,27 @@
 import { motion } from "motion/react";
 import { useState } from "react";
-import Input from "../components/input";
-import { User, Mail, Lock } from "lucide-react";
-import { Link } from "react-router-dom";
+import Input from "../components/Input";
+import { User, Mail, Lock, Loader } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import PasswordStrengthMeter from "../components/PasswordStrengthMeter";
-
-const handleSignUp = (e) => {
-    e.preventDefault();
-};
+import { useAuthStore } from "../store/authStore";
 
 const SignUpPage = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { signup, error, isLoading } = useAuthStore();
+    const navigate = useNavigate();
+
+    const handleSignUp = async (e) => {
+        e.preventDefault();
+        try {
+            await signup(email, password, name);
+            navigate("/verify-email");
+        } catch (error) {
+            console.error("Error creating account:", error);
+        }
+    };
 
     return (
         <motion.div
@@ -62,6 +71,11 @@ const SignUpPage = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
+                    {error && (
+                        <p className="text-red-500 text-center mt-2 font-semibold">
+                            {error}
+                        </p>
+                    )}
                     {/* password strength meter */}
                     <PasswordStrengthMeter password={password} />
 
@@ -69,9 +83,18 @@ const SignUpPage = () => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         type="submit"
+                        disabled={isLoading}
                         className="w-full px-4 py-2 rounded-md bg-gray-100 text-gray-900 hover:bg-gray-200 transition-colors"
                     >
-                        <span className="text-gray-900 font-bold">Sign Up</span>
+                        {isLoading ? (
+                            <div className="flex items-center justify-center">
+                                <Loader className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900" />
+                            </div>
+                        ) : (
+                            <span className="text-gray-900 font-bold">
+                                Sign Up
+                            </span>
+                        )}
                     </motion.button>
                 </form>
             </div>
