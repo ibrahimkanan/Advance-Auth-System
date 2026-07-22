@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
+import { useAuthStore } from "../store/authStore";
+import toast from "react-hot-toast";
 
 const EmailVerificationPage = () => {
     const [code, setCode] = useState(["", "", "", "", "", ""]);
     const inputRefs = useRef([]);
     const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
+
+    const { error, isLoading, verifyEmail } = useAuthStore();
 
     const handlePaste = (e) => {
         e.preventDefault();
@@ -40,10 +42,16 @@ const EmailVerificationPage = () => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const verificationCode = code.join("");
-        alert(`Verification Code Submitted: ${verificationCode}`);
+        try {
+            await verifyEmail(verificationCode);
+            navigate("/");
+            toast.success("Email verified successfully");
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     useEffect(() => {
@@ -89,15 +97,23 @@ const EmailVerificationPage = () => {
                             ))}
                         </div>
 
+                        {error && (
+                            <p className="text-red-500 text-center">{error}</p>
+                        )}
+
                         <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             type="submit"
                             className="w-full px-4 py-2 rounded-md bg-gray-100 text-gray-900 hover:bg-gray-200 transition-colors"
                         >
-                            <span className="text-gray-900 font-bold">
-                                Verify
-                            </span>
+                            {isLoading ? (
+                                "Verifying..."
+                            ) : (
+                                <span className="text-gray-900 font-bold">
+                                    Verify
+                                </span>
+                            )}
                         </motion.button>
                     </form>
                 </div>
