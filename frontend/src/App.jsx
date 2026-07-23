@@ -8,6 +8,7 @@ import { useAuthStore } from "./store/authStore.js";
 import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import DashboardPage from "./pages/DashboardPage.jsx";
+import LoadingSpinner from "./components/LoadingSpinner.jsx";
 
 // protected route for authenticated users
 const ProtectedRoute = ({ children }) => {
@@ -15,7 +16,7 @@ const ProtectedRoute = ({ children }) => {
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
-    if (!user.isVerified) {
+    if (!user?.isVerified) {
         return <Navigate to="/verify-email" replace />;
     }
     return children;
@@ -25,7 +26,7 @@ const ProtectedRoute = ({ children }) => {
 const RedirectAuthenticatedUser = ({ children }) => {
     const { isAuthenticated, user } = useAuthStore();
 
-    if (isAuthenticated && user.isVerified) {
+    if (isAuthenticated && user?.isVerified) {
         return <Navigate to="/" replace />;
     }
     return children;
@@ -37,9 +38,10 @@ function App() {
         checkAuth();
     }, [checkAuth]);
 
-    console.log("ischeckingAuth ", isCheckingAuth);
-    console.log("isAuthenticated ", isAuthenticated);
-    console.log("user ", user);
+    if (isCheckingAuth) {
+        return <LoadingSpinner />;
+    }
+
     return (
         <div className="min-h-screen bg-neutral-950 flex items-center justify-center relative overflow-hidden">
             <div className="absolute inset-0 z-0 w-full h-full">

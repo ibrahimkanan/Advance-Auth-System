@@ -40,6 +40,51 @@ export const useAuthStore = create((set) => ({
         }
     },
 
+    login: async (email, password) => {
+        set({ isLoading: true });
+        try {
+            const response = await axios.post(`${API_BASE_URL}/login`, {
+                email,
+                password,
+            });
+            set({
+                user: response.data.user,
+                isAuthenticated: true,
+                error: null,
+                isLoading: false,
+            });
+        } catch (error) {
+            set({
+                error: error.response?.data?.message || "login failed",
+                isLoading: false,
+            });
+            throw error;
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
+    logout: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            await axios.post(`${API_BASE_URL}/logout`);
+            set({
+                user: null,
+                isAuthenticated: false,
+                error: null,
+                isLoading: false,
+            });
+        } catch (error) {
+            set({
+                error: error.response?.data?.message || "logout failed",
+                isLoading: false,
+            });
+            throw error;
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
     verifyEmail: async (code) => {
         set({ isLoading: true, error: null });
         try {
@@ -55,10 +100,12 @@ export const useAuthStore = create((set) => ({
             return response.data;
         } catch (error) {
             set({
-                error: error.response?.data?.message || "signup failed",
+                error: error.response?.data?.message || "verify-email failed",
                 isLoading: false,
             });
             throw error;
+        } finally {
+            set({ isLoading: false });
         }
     },
 
@@ -74,10 +121,12 @@ export const useAuthStore = create((set) => ({
             });
         } catch (error) {
             set({
-                error: null,
+                error: error.response?.data?.message || "checkAuth failed",
                 isCheckingAuth: false,
                 isLoading: false,
             });
+        } finally {
+            set({ isCheckingAuth: false });
         }
     },
 }));
