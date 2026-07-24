@@ -13,9 +13,10 @@ export const useAuthStore = create((set) => ({
     error: null,
     isLoading: false,
     isCheckingAuth: true,
+    message: null,
 
     signup: async (email, password, name) => {
-        set({ isLoading: true });
+        set({ isLoading: true, error: null });
         try {
             const response = await axios.post(`${API_BASE_URL}/signup`, {
                 email,
@@ -41,7 +42,7 @@ export const useAuthStore = create((set) => ({
     },
 
     login: async (email, password) => {
-        set({ isLoading: true });
+        set({ isLoading: true, error: null });
         try {
             const response = await axios.post(`${API_BASE_URL}/login`, {
                 email,
@@ -121,12 +122,64 @@ export const useAuthStore = create((set) => ({
             });
         } catch (error) {
             set({
-                error: error.response?.data?.message || "checkAuth failed",
+                error: null,
                 isCheckingAuth: false,
+                isAuthenticated: false,
                 isLoading: false,
             });
+            console.log(error);
         } finally {
             set({ isCheckingAuth: false });
+        }
+    },
+
+    forgotPassword: async (email) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await axios.post(
+                `${API_BASE_URL}/forgot-password`,
+                {
+                    email,
+                },
+            );
+            set({
+                isLoading: false,
+                message: response.data.message,
+            });
+
+            return response.data;
+        } catch (error) {
+            set({
+                error:
+                    error.response?.data?.message || "forgot-password failed",
+                isLoading: false,
+            });
+            throw error;
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
+    resetPassword: async (token, password) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await axios.post(
+                `${API_BASE_URL}/reset-password/${token}`,
+                { password },
+            );
+            set({
+                isLoading: false,
+                message: response.data.message,
+            });
+            return response.data;
+        } catch (error) {
+            set({
+                error: error.response?.data?.message || "reset-password failed",
+                isLoading: false,
+            });
+            throw error;
+        } finally {
+            set({ isLoading: false });
         }
     },
 }));

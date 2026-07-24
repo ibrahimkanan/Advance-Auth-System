@@ -9,6 +9,8 @@ import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import LoadingSpinner from "./components/LoadingSpinner.jsx";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 
 // protected route for authenticated users
 const ProtectedRoute = ({ children }) => {
@@ -33,7 +35,7 @@ const RedirectAuthenticatedUser = ({ children }) => {
 };
 
 function App() {
-    const { isAuthenticated, checkAuth, isCheckingAuth, user } = useAuthStore();
+    const { checkAuth, isCheckingAuth } = useAuthStore();
     useEffect(() => {
         checkAuth();
     }, [checkAuth]);
@@ -79,6 +81,22 @@ function App() {
                         element={
                             <RedirectAuthenticatedUser>
                                 <EmailVerificationPage />
+                            </RedirectAuthenticatedUser>
+                        }
+                    />
+                    <Route
+                        path="/forgot-password"
+                        element={
+                            <RedirectAuthenticatedUser>
+                                <ForgotPasswordPage />
+                            </RedirectAuthenticatedUser>
+                        }
+                    />
+                    <Route
+                        path="/reset-password/:token"
+                        element={
+                            <RedirectAuthenticatedUser>
+                                <ResetPasswordPage />
                             </RedirectAuthenticatedUser>
                         }
                     />
